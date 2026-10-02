@@ -74,6 +74,16 @@ async function createWindow(): Promise<void> {
     if (!config.get('startHidden')) mainWindow?.show()
   })
 
+  mainWindow.on('blur', () => {
+    mainWindow?.webContents.setImageAnimationPolicy('noAnimation')
+    mainWindow?.webContents.send('window-blur')
+  })
+
+  mainWindow.on('focus', () => {
+    mainWindow?.webContents.setImageAnimationPolicy('animate')
+    mainWindow?.webContents.send('window-focus')
+  })
+
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }

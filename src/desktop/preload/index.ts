@@ -41,3 +41,50 @@ document.onreadystatechange = async () => {
     ipcRenderer.send(IpcEvents.RENDERER_LOADED)
   }
 }
+
+function resetImageSrc(img: HTMLImageElement): void {
+  const src = img.src
+  if (src && (src.startsWith('http') || src.startsWith('blob:') || src.startsWith('data:'))) {
+    img.src = ''
+    img.src = src
+  }
+}
+
+function handleWindowBlur(): void {
+  document.querySelectorAll('img').forEach(resetImageSrc)
+
+  document.querySelectorAll('video').forEach((video) => {
+    if (!video.paused) {
+      video.pause()
+      video.dataset.pausedByBlur = 'true'
+    }
+  })
+}
+
+function handleWindowFocus(): void {
+  const resume = (): void => {
+    document.querySelectorAll('img').forEach(resetImageSrc)
+
+    document.querySelectorAll('video').forEach((video) => {
+      if (video.dataset.pausedByBlur === 'true') {
+        delete video.dataset.pausedByBlur
+        video.play().catch(() => {})
+      }
+    })
+  }
+
+  // Resume immediately
+  resume()
+
+  // Retry after short delay to ensure webContents animation policy has updated
+  setTimeout(resume, 50)
+}
+
+window.addEventListener('blur', handleWindowBlur)
+window.addEventListener('focus', handleWindowFocus)
+
+ipcRenderer.on('window-blur', handleWindowBlur)
+ipcRenderer.on('window-focus', handleWindowFocus)
+
+
+
