@@ -9,7 +9,7 @@ import {
   desktopCapturer
 } from 'electron'
 import { join, resolve } from 'path'
-import { electronApp, is } from '@electron-toolkit/utils'
+import { electronApp } from '@electron-toolkit/utils'
 import Store from 'electron-store'
 import { IpcEvents, loadPlugins, replaceForSource } from '@cinny-electron/core'
 import icon from '../../../resources/tray-icon/cinny.png?asset'
@@ -127,8 +127,6 @@ async function createWindow(): Promise<void> {
   mainWindow.loadURL(url).then(() => {
     onReady()
   })
-
-  if (is.dev) mainWindow.webContents.openDevTools()
 }
 
 function onReady(): void {
